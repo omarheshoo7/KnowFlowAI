@@ -13,12 +13,33 @@ v1 Scope (Milestone 0 → v0.1)
 - FastAPI backend with a well-defined API for ingestion and QA flows.
 - Cited AI answers that reference source documents.
 
-What's in this repo (Milestone 0)
+What's in this repo
+
+Milestone 0
 - Documentation and planning: architecture, PRD, RAG pipeline, ingestion, testing, deployment plan.
-- No application code yet — docs and structure only.
+
+Milestone 1 (current)
+- FastAPI backend scaffold with health endpoint, CORS, config, and logging.
+- `GET /api/health` → `{ "status": "ok", "service": "...", "version": "..." }`
+
+Running the backend
+
+```bash
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+uvicorn backend.app.main:app --reload
+```
+
+Running tests
+
+```bash
+pytest
+```
 
 Next steps
-- Implement backend API and ingestion worker (Milestone 1).
+- Milestone 2: Document upload endpoint and storage layer.
 
 Contact
 - Project: KnowFlow AI

@@ -1,18 +1,22 @@
 # Project Status — KnowFlow AI
 
-Milestone: 0 (Documentation)
+Milestone: 1 (Backend Foundation)
 
 Summary
-- Status: Planning complete for Milestone 0.
-- Deliverables: Documentation skeleton and product requirements.
+- Status: Complete.
+- Deliverables: FastAPI backend scaffold with health endpoint, CORS, config, logging, and pytest suite.
+
+What was built
+- `backend/app/main.py` — FastAPI app with CORS middleware and health router.
+- `backend/app/core/config.py` — Pydantic settings loaded from environment.
+- `backend/app/core/logging.py` — Basic stdout logging setup.
+- `backend/app/api/routes/health.py` — GET /api/health endpoint.
+- `backend/tests/test_health.py` — pytest tests for the health endpoint.
+- `requirements.txt` / `requirements-dev.txt` / `.env.example`
 
 Open items
 - Decide primary vector DB for v1 (options: Pinecone, Weaviate, FAISS).
 - Choose embedding provider (OpenAI or open-source alternative).
 
-Owners
-- Product: TBD
-- Engineering lead: TBD
-
 Next milestone
-- Milestone 1: Implement FastAPI backend skeleton and ingestion worker.
+- Milestone 2: Document upload endpoint and storage layer.

@@ -1,0 +1,23 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from backend.app.core.config import settings
+from backend.app.core.logging import setup_logging
+from backend.app.api.routes import health
+
+setup_logging()
+
+app = FastAPI(
+    title=settings.app_name,
+    version=settings.version,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.allowed_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(health.router, prefix="/api")
