@@ -9,3 +9,4 @@ class DocumentUploadResponse(BaseModel):
     extraction_status: str
     text_length: int
     text_preview: str
+    chunk_count: int

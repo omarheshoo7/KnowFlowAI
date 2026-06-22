@@ -29,15 +29,15 @@ Version 1 does not use OCR. It supports searchable PDFs, DOCX, TXT, and Markdown
 - Milestone 0 complete: documentation scaffold.
 - Milestone 1 complete: FastAPI backend foundation (health endpoint, CORS, config, logging, pytest).
 - Milestone 2 complete: document upload endpoint with file-type validation and local storage.
-- Next milestone is Milestone 3: Text Extraction.
+- Milestone 3 complete: text extraction (PyMuPDF, python-docx, plain text; scanned PDF detection).
+- Next milestone is Milestone 4: Text Chunking.
 
-## Milestone 3 Scope
+## Milestone 4 Scope
 
-- Extract text from uploaded documents (PDF, DOCX, TXT, MD)
-- Use PyMuPDF for PDF, python-docx for DOCX, plain read for TXT/MD
-- Detect scanned/image-based PDFs and return a clear rejection message
-- No OCR
-- No chunking yet
+- Split extracted text into overlapping word-based chunks
+- Default chunk_size_words=500, chunk_overlap_words=100
+- Each chunk carries chunk_index, text, word_count, character_count
+- Upload response gains chunk_count field
 - No embeddings yet
 - No vector database yet
 - No frontend yet

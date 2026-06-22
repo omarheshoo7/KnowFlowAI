@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0] - Milestone 4 — Text Chunking
+- Added `chunking_service` with word-based overlapping chunk splitting.
+- Default: chunk_size_words=500, chunk_overlap_words=100 (step=400).
+- Each chunk carries chunk_index, text, word_count, character_count.
+- Extended `DocumentUploadResponse` schema with `chunk_count`.
+- Upload route calls chunking after successful extraction; chunk_count=0 on failure.
+- Upload success message updated to include "chunked".
+- Added 18 new tests (unit + integration); 47 total, all passing.
+- Updated CLAUDE.md milestone state.
+
 ## [0.4.0] - Milestone 3 — Text Extraction
 - Added `text_extraction_service` supporting PDF (PyMuPDF/fitz), DOCX (python-docx), TXT, and Markdown.
 - Scanned/image-based PDFs are detected and return a clear rejection message instead of empty text.

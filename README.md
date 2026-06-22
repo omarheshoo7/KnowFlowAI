@@ -26,11 +26,16 @@ Milestone 2
 - Document upload endpoint with file type validation and local storage.
 - `POST /api/documents/upload` — accepts .pdf, .docx, .txt, .md; rejects all others.
 
-Milestone 3 (current)
+Milestone 3
 - Text extraction integrated into the upload flow.
 - Searchable PDFs, DOCX, TXT, and MD return extracted text on upload.
 - Scanned/image PDFs are detected and rejected with a clear message (no OCR).
-- Response now includes `extraction_status`, `text_length`, and `text_preview`.
+- Response includes `extraction_status`, `text_length`, and `text_preview`.
+
+Milestone 4 (current)
+- Extracted text is split into overlapping word-based chunks.
+- Default: 500 words per chunk, 100-word overlap between chunks.
+- Response now includes `chunk_count`.
 
 Running the backend
 
@@ -42,14 +47,10 @@ pip install -r requirements-dev.txt
 uvicorn backend.app.main:app --reload
 ```
 
-Test the upload + extraction endpoint
+Test the upload → extract → chunk pipeline
 
 ```bash
-# Upload a searchable PDF
-curl -X POST http://localhost:8000/api/documents/upload \
-  -F "file=@/path/to/report.pdf"
-
-# Upload a plain text file
+# Upload a text file and see chunk_count in the response
 curl -X POST http://localhost:8000/api/documents/upload \
   -F "file=@/path/to/notes.txt"
 
@@ -64,7 +65,7 @@ pytest
 ```
 
 Next steps
-- Milestone 4: Text chunking — split extracted text into overlapping chunks.
+- Milestone 5: Embeddings — generate vector embeddings for each chunk.
 
 Contact
 - Project: KnowFlow AI

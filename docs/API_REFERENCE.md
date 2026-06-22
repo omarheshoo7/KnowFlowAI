@@ -33,10 +33,11 @@ Success response — searchable document (HTTP 200):
   "filename": "report.pdf",
   "file_type": "pdf",
   "status": "uploaded",
-  "message": "Document uploaded and text extracted successfully",
+  "message": "Document uploaded, text extracted, and chunked successfully",
   "extraction_status": "success",
   "text_length": 4821,
-  "text_preview": "Introduction\n\nThis report covers..."
+  "text_preview": "Introduction\n\nThis report covers...",
+  "chunk_count": 10
 }
 ```
 
@@ -49,7 +50,8 @@ Success response — scanned/image PDF (HTTP 200, extraction failed):
   "message": "This document appears to be scanned or image-based. KnowFlow AI v1 supports searchable documents only.",
   "extraction_status": "failed",
   "text_length": 0,
-  "text_preview": ""
+  "text_preview": "",
+  "chunk_count": 0
 }
 ```
 
