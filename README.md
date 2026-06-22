@@ -18,9 +18,13 @@ What's in this repo
 Milestone 0
 - Documentation and planning: architecture, PRD, RAG pipeline, ingestion, testing, deployment plan.
 
-Milestone 1 (current)
+Milestone 1
 - FastAPI backend scaffold with health endpoint, CORS, config, and logging.
 - `GET /api/health` → `{ "status": "ok", "service": "...", "version": "..." }`
+
+Milestone 2 (current)
+- Document upload endpoint with file type validation and local storage.
+- `POST /api/documents/upload` — accepts .pdf, .docx, .txt, .md; rejects all others.
 
 Running the backend
 
@@ -32,6 +36,13 @@ pip install -r requirements-dev.txt
 uvicorn backend.app.main:app --reload
 ```
 
+Test the upload endpoint with curl
+
+```bash
+curl -X POST http://localhost:8000/api/documents/upload \
+  -F "file=@/path/to/your/document.pdf"
+```
+
 Running tests
 
 ```bash
@@ -39,7 +50,7 @@ pytest
 ```
 
 Next steps
-- Milestone 2: Document upload endpoint and storage layer.
+- Milestone 3: Text extraction from uploaded documents.
 
 Contact
 - Project: KnowFlow AI

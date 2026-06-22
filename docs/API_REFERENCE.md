@@ -1,12 +1,57 @@
-# API Reference (planned)
+# API Reference
 
-This file outlines the planned FastAPI endpoints for v1.
+## Implemented endpoints
+
+### GET /api/health
+Returns backend health status.
+
+Response:
+```json
+{
+  "status": "ok",
+  "service": "KnowFlow AI Backend",
+  "version": "0.1.0"
+}
+```
+
+### POST /api/documents/upload
+Upload a document file. Accepts multipart/form-data.
+
+Supported file types: `.pdf`, `.docx`, `.txt`, `.md`
+
+Unsupported types (returns HTTP 400): `.jpg`, `.jpeg`, `.png`, and any other extension.
+
+Example request:
+```bash
+curl -X POST http://localhost:8000/api/documents/upload \
+  -F "file=@report.pdf"
+```
+
+Success response (HTTP 200):
+```json
+{
+  "filename": "report.pdf",
+  "file_type": "pdf",
+  "status": "uploaded",
+  "message": "Document uploaded successfully"
+}
+```
+
+Error response (HTTP 400):
+```json
+{
+  "detail": "Unsupported file type '.png'. Allowed: ['.docx', '.md', '.pdf', '.txt']"
+}
+```
+
+---
+
+## Planned endpoints
 
 Auth
 - `POST /auth/token` — Exchange credentials for access token (TBD auth scheme)
 
 Ingestion
-- `POST /documents/upload` — Upload a document file (multipart). Returns document id and status.
 - `GET /documents/{id}` — Get document metadata and extraction status.
 - `GET /documents` — List documents with pagination and filters.
 
@@ -18,9 +63,4 @@ Search & QA
 - `POST /search` — Return top-K chunks for a query.
 
 Admin
-- `GET /health` — System health
 - `GET /metrics` — Operational metrics (prometheus)
-
-Notes
-- All responses include trace IDs for auditability.
-- API will support pagination, filtering, and RBAC enforced via middleware.

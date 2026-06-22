@@ -1,7 +1,7 @@
 # Document Ingestion
 
 Supported file types (v1)
-- PDF (with text layer), DOCX, TXT
+- PDF (with text layer), DOCX, TXT, Markdown (.md)
 
 Flow
 1. Client uploads file to `POST /documents/upload`.
