@@ -1,25 +1,26 @@
 # Project Status — KnowFlow AI
 
-Milestone: 2 (Document Upload and File Validation)
+Milestone: 3 (Text Extraction)
 
 Summary
 - Status: Complete.
-- Deliverables: POST /api/documents/upload endpoint with extension validation and local file storage.
+- Deliverables: Text extraction service for all supported file types, integrated into the upload endpoint.
 
 What was built
-- `backend/app/api/routes/documents.py` — POST /api/documents/upload route.
-- `backend/app/services/storage_service.py` — Extension validation and safe local file save.
-- `backend/app/schemas/document.py` — DocumentUploadResponse Pydantic schema.
-- `backend/storage/uploads/` — Local upload directory (contents git-ignored).
-- `backend/tests/test_documents.py` — 13 tests covering success and rejection cases.
-- Added `python-multipart` to requirements.txt.
+- `backend/app/services/text_extraction_service.py` — Extraction for PDF (PyMuPDF), DOCX (python-docx), TXT, MD.
+- `backend/app/schemas/document.py` — Extended with extraction_status, text_length, text_preview fields.
+- `backend/app/api/routes/documents.py` — Upload route now calls extraction after save.
+- `backend/tests/test_text_extraction.py` — 13 new tests (unit + integration) for all file types.
+- Added `pymupdf` and `python-docx` to requirements.txt.
 
-Supported file types: .pdf, .docx, .txt, .md
-Rejected file types: .jpg, .jpeg, .png, and any unsupported extension.
+Extraction behaviour
+- Searchable PDF, DOCX, TXT, MD → extraction_status: "success"
+- Scanned/blank PDF → extraction_status: "failed" with clear OCR message
+- text_preview capped at 300 characters
 
 Open items
 - Decide primary vector DB for v1 (options: Pinecone, Weaviate, FAISS).
 - Choose embedding provider (OpenAI or open-source alternative).
 
 Next milestone
-- Milestone 3: Text extraction from uploaded documents (PDF, DOCX, TXT, MD).
+- Milestone 4: Text chunking — split extracted text into overlapping chunks for embedding.

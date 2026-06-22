@@ -22,9 +22,15 @@ Milestone 1
 - FastAPI backend scaffold with health endpoint, CORS, config, and logging.
 - `GET /api/health` → `{ "status": "ok", "service": "...", "version": "..." }`
 
-Milestone 2 (current)
+Milestone 2
 - Document upload endpoint with file type validation and local storage.
 - `POST /api/documents/upload` — accepts .pdf, .docx, .txt, .md; rejects all others.
+
+Milestone 3 (current)
+- Text extraction integrated into the upload flow.
+- Searchable PDFs, DOCX, TXT, and MD return extracted text on upload.
+- Scanned/image PDFs are detected and rejected with a clear message (no OCR).
+- Response now includes `extraction_status`, `text_length`, and `text_preview`.
 
 Running the backend
 
@@ -36,11 +42,19 @@ pip install -r requirements-dev.txt
 uvicorn backend.app.main:app --reload
 ```
 
-Test the upload endpoint with curl
+Test the upload + extraction endpoint
 
 ```bash
+# Upload a searchable PDF
 curl -X POST http://localhost:8000/api/documents/upload \
-  -F "file=@/path/to/your/document.pdf"
+  -F "file=@/path/to/report.pdf"
+
+# Upload a plain text file
+curl -X POST http://localhost:8000/api/documents/upload \
+  -F "file=@/path/to/notes.txt"
+
+# Interactive API docs
+open http://localhost:8000/docs
 ```
 
 Running tests
@@ -50,7 +64,7 @@ pytest
 ```
 
 Next steps
-- Milestone 3: Text extraction from uploaded documents.
+- Milestone 4: Text chunking — split extracted text into overlapping chunks.
 
 Contact
 - Project: KnowFlow AI

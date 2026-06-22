@@ -27,17 +27,33 @@ curl -X POST http://localhost:8000/api/documents/upload \
   -F "file=@report.pdf"
 ```
 
-Success response (HTTP 200):
+Success response — searchable document (HTTP 200):
 ```json
 {
   "filename": "report.pdf",
   "file_type": "pdf",
   "status": "uploaded",
-  "message": "Document uploaded successfully"
+  "message": "Document uploaded and text extracted successfully",
+  "extraction_status": "success",
+  "text_length": 4821,
+  "text_preview": "Introduction\n\nThis report covers..."
 }
 ```
 
-Error response (HTTP 400):
+Success response — scanned/image PDF (HTTP 200, extraction failed):
+```json
+{
+  "filename": "scan.pdf",
+  "file_type": "pdf",
+  "status": "uploaded",
+  "message": "This document appears to be scanned or image-based. KnowFlow AI v1 supports searchable documents only.",
+  "extraction_status": "failed",
+  "text_length": 0,
+  "text_preview": ""
+}
+```
+
+Error response — unsupported file type (HTTP 400):
 ```json
 {
   "detail": "Unsupported file type '.png'. Allowed: ['.docx', '.md', '.pdf', '.txt']"

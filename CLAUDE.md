@@ -26,22 +26,21 @@ Version 1 does not use OCR. It supports searchable PDFs, DOCX, TXT, and Markdown
 
 ## Current Milestone State
 
-- Milestone 0 is complete and pushed.
-- Next milestone is Milestone 1: Backend Foundation.
+- Milestone 0 complete: documentation scaffold.
+- Milestone 1 complete: FastAPI backend foundation (health endpoint, CORS, config, logging, pytest).
+- Milestone 2 complete: document upload endpoint with file-type validation and local storage.
+- Next milestone is Milestone 3: Text Extraction.
 
-## Milestone 1 Scope
+## Milestone 3 Scope
 
-- FastAPI backend scaffold
-- Health endpoint
-- Config
-- Logging
-- CORS
-- pytest setup
-- No RAG logic yet
-- No frontend yet
+- Extract text from uploaded documents (PDF, DOCX, TXT, MD)
+- Use PyMuPDF for PDF, python-docx for DOCX, plain read for TXT/MD
+- Detect scanned/image-based PDFs and return a clear rejection message
+- No OCR
+- No chunking yet
 - No embeddings yet
 - No vector database yet
-- No document extraction yet
+- No frontend yet
 
 ## Testing Rule
 

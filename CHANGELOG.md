@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0] - Milestone 3 — Text Extraction
+- Added `text_extraction_service` supporting PDF (PyMuPDF/fitz), DOCX (python-docx), TXT, and Markdown.
+- Scanned/image-based PDFs are detected and return a clear rejection message instead of empty text.
+- Extended `DocumentUploadResponse` schema with `extraction_status`, `text_length`, and `text_preview`.
+- Upload endpoint now extracts text immediately after saving the file.
+- `text_preview` is capped at 300 characters.
+- Added `pymupdf==1.24.5` and `python-docx==1.1.2` to requirements.txt.
+- Added 13 new tests (unit + integration); 29 total, all passing.
+- Updated CLAUDE.md milestone state.
+
 ## [0.3.0] - Milestone 2 — Document Upload and File Validation
 - Added `POST /api/documents/upload` endpoint.
 - Added extension validation — accepts .pdf, .docx, .txt, .md; rejects all others with HTTP 400.
