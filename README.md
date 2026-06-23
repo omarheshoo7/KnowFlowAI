@@ -5,8 +5,8 @@
 ---
 
 **Status:** In active development
-**Completed through:** Milestone 7 — Semantic Retrieval
-**Next:** Milestone 8 — RAG Answer Generation with Citations
+**Completed through:** Milestone 8 — RAG Answer Generation with Citations
+**Next:** Milestone 9 — SaaS Frontend Dashboard
 
 ---
 
@@ -26,7 +26,10 @@
 - `FakeVectorStore` for tests — in-memory, no Docker or network required
 - Semantic search endpoint — `POST /api/search` embeds the query and returns top-K scored chunks
 - Input validation: empty/blank queries rejected (HTTP 422), `top_k` clamped 1–20
-- Full pytest coverage for all completed milestones (93 tests passing)
+- RAG answer generation — `POST /api/chat` retrieves chunks, builds a grounded prompt, calls a local LLM, returns an answer with inline `[1]` style citations and a sources list
+- Provider-based LLM architecture — `OllamaLLMProvider` (default) + `FakeLLMProvider` (tests)
+- Empty collection returns a clear "no information found" message; no hallucination
+- Full pytest coverage for all completed milestones (115 tests passing)
 
 ---
 
@@ -42,6 +45,7 @@
 | Testing | pytest + httpx |
 | Embeddings | sentence-transformers / BAAI/bge-small-en-v1.5 |
 | Vector database | Qdrant (self-hosted via Docker) |
+| LLM (answer generation) | Ollama (local, free) — default model `llama3.2:3b` |
 | Frontend (upcoming) | TBD |
 
 ---
@@ -58,8 +62,8 @@
 | 5 | Embeddings Foundation | Complete |
 | 6 | Vector Database / Qdrant | Complete |
 | 7 | Semantic Retrieval | Complete |
-| 8 | RAG Answer Generation with Citations | **Next** |
-| 9 | SaaS Frontend Dashboard | Planned |
+| 8 | RAG Answer Generation with Citations | Complete |
+| 9 | SaaS Frontend Dashboard | **Next** |
 | 10 | Deployment & Portfolio Polish | Planned |
 
 ---
@@ -182,6 +186,52 @@ Semantic search over all stored document chunks. Embeds the query with the same 
 }
 ```
 
+---
+
+### `POST /api/chat`
+
+RAG answer generation. Retrieves the most relevant chunks for the question, sends them to a local Ollama LLM with a grounding prompt, and returns a cited answer.
+
+**Request body:**
+```json
+{
+  "question": "What is the refund policy?",
+  "top_k": 5
+}
+```
+
+**Success response (documents uploaded):**
+```json
+{
+  "question": "What is the refund policy?",
+  "answer": "Refund requests must be submitted within 30 days of purchase [1]. Items must be in original condition [2].",
+  "citations": ["[1]", "[2]"],
+  "sources": [
+    {
+      "source_id": "[1]",
+      "document_id": "a3f1c2d4...",
+      "original_filename": "policy.pdf",
+      "file_type": "pdf",
+      "chunk_index": 3,
+      "score": 0.87,
+      "chunk_text_preview": "Refund requests must be submitted within 30 days..."
+    }
+  ],
+  "retrieval_count": 2
+}
+```
+
+**No documents uploaded (empty collection):**
+```json
+{
+  "question": "What is the refund policy?",
+  "answer": "I could not find relevant information in the uploaded documents.",
+  "citations": [],
+  "sources": [],
+  "retrieval_count": 0
+}
+```
+
 Interactive API docs are available at `http://localhost:8000/docs` when the server is running.
 
 ---
@@ -206,26 +256,41 @@ docker run -p 6333:6333 qdrant/qdrant
 # → REST API: http://localhost:6333
 # → Dashboard: http://localhost:6333/dashboard
 
-# 5. Start the backend
-uvicorn backend.app.main:app --reload
+# 5. Start Ollama and pull a model (required for /api/chat; not needed for tests)
+ollama serve
+ollama pull llama3.2:3b
+# → API: http://localhost:11434
+
+# 6. Start the backend
+PYTHONPATH=. uvicorn backend.app.main:app --reload
 # → http://localhost:8000
 # → http://localhost:8000/docs  (Swagger UI)
 
-# 6. Run the test suite (no Docker required — uses FakeVectorStore)
+# 7. Run the test suite
+# No Docker, no Ollama, no model downloads required — all fakes are used automatically
 PYTHONPATH=. pytest
 ```
+
+> **Tests vs. real use**
+> - `pytest` uses `FakeEmbeddingProvider`, `FakeVectorStore`, and `FakeLLMProvider` automatically via `conftest.py`. No external services needed.
+> - Real manual use requires Qdrant (Docker) + Ollama running locally.
 
 ### Manual end-to-end flow
 
 ```bash
-# Upload a document
+# 1. Upload a document
 curl -X POST http://localhost:8000/api/documents/upload \
   -F "file=@your_document.pdf"
 
-# Search for relevant chunks
+# 2. Search for relevant chunks (no LLM)
 curl -X POST http://localhost:8000/api/search \
   -H "Content-Type: application/json" \
   -d '{"query": "What is the refund policy?", "top_k": 5}'
+
+# 3. Ask a question and get a cited AI answer
+curl -X POST http://localhost:8000/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"question": "What is the refund policy?", "top_k": 5}'
 ```
 
 ---
@@ -244,27 +309,32 @@ KnowFlowAI/
 │   │   │   └── routes/
 │   │   │       ├── health.py            # GET /api/health
 │   │   │       ├── documents.py         # POST /api/documents/upload
-│   │   │       └── search.py            # POST /api/search
+│   │   │       ├── search.py            # POST /api/search
+│   │   │       └── chat.py              # POST /api/chat
 │   │   ├── services/
 │   │   │   ├── storage_service.py       # File validation and local save
 │   │   │   ├── text_extraction_service.py  # PDF/DOCX/TXT/MD extraction
 │   │   │   ├── chunking_service.py      # Overlapping word-based chunking
 │   │   │   ├── embedding_service.py     # BGE embeddings (local / fake)
-│   │   │   └── vector_store_service.py  # Qdrant store + search (real / fake)
+│   │   │   ├── vector_store_service.py  # Qdrant store + search (real / fake)
+│   │   │   ├── llm_service.py           # Ollama LLM (real / fake)
+│   │   │   └── rag_service.py           # RAG pipeline orchestration
 │   │   └── schemas/
 │   │       ├── document.py              # Upload response model
-│   │       └── search.py                # Search request / result / response
+│   │       ├── search.py                # Search request / result / response
+│   │       └── chat.py                  # Chat request / citation / response
 │   ├── storage/
 │   │   └── uploads/                     # Uploaded files (git-ignored)
 │   └── tests/
-│       ├── conftest.py                  # FakeEmbeddingProvider + FakeVectorStore fixtures
+│       ├── conftest.py                  # Fake providers for all three services
 │       ├── test_health.py
 │       ├── test_documents.py
 │       ├── test_text_extraction.py
 │       ├── test_chunking.py
 │       ├── test_embeddings.py
 │       ├── test_vector_store.py
-│       └── test_search.py
+│       ├── test_search.py
+│       └── test_chat.py
 ├── docs/                                # Architecture and planning docs
 ├── CLAUDE.md                            # AI assistant project instructions
 ├── README.md
@@ -290,16 +360,15 @@ OCR and document-intelligence support may be added in a future version.
 |---|---|
 | Backend API design | Clean FastAPI structure with separated routes, services, and schemas |
 | Document processing | Multi-format text extraction pipeline (PDF, DOCX, TXT, MD) |
-| RAG pipeline foundations | Upload → extract → chunk → embed → store → semantic search, end to end |
-| Provider / fake pattern | Swappable implementations (LocalBGE / Fake, Qdrant / Fake) enable fast, offline tests |
-| Test-driven development | 93 passing tests across unit and integration layers, zero mocking of business logic |
-| Modular AI engineering | Each concern (storage, extraction, chunking, embeddings, retrieval) lives in its own service |
+| RAG pipeline foundations | Upload → extract → chunk → embed → store → search → LLM answer with citations |
+| Provider / fake pattern | Swappable implementations (LocalBGE / Fake, Qdrant / Fake, Ollama / Fake) for fast offline tests |
+| Test-driven development | 115 passing tests across unit and integration layers, zero real services needed |
+| Modular AI engineering | Each concern (storage, extraction, chunking, embeddings, retrieval, LLM) lives in its own service |
 | SaaS product thinking | Structured milestone plan from backend to frontend to deployment |
 
 ---
 
 ## Roadmap
 
-- **Milestone 8** — RAG answer generation: feed retrieved chunks into an LLM and return an answer with inline citations
 - **Milestone 9** — SaaS frontend dashboard for document upload, search, and Q&A
 - **Milestone 10** — Deployment, monitoring, and portfolio polish

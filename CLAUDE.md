@@ -33,17 +33,18 @@ Version 1 does not use OCR. It supports searchable PDFs, DOCX, TXT, and Markdown
 - Milestone 4 complete: word-based overlapping text chunking; upload response includes chunk_count.
 - Milestone 5 complete: provider-based embeddings (BAAI/bge-small-en-v1.5, 384-dim); FakeEmbeddingProvider for tests.
 - Milestone 6 complete: Qdrant vector database foundation; QdrantVectorStore + FakeVectorStore; stored_vector_count in upload response.
-- Next milestone is Milestone 7: Semantic Retrieval.
+- Milestone 7 complete: semantic retrieval; POST /api/search; ScoredChunk; VectorStore.search(); 93 tests passing.
+- Next milestone is Milestone 8: RAG Answer Generation with Citations.
 
-## Milestone 7 Scope
+## Milestone 8 Scope
 
-- POST /api/search endpoint: embed query → Qdrant top-K → return scored chunks
-- SearchRequest / SearchResult / SearchResponse Pydantic schemas
-- VectorStore ABC gains search(query_embedding, top_k) → List[ScoredChunk]
-- QdrantVectorStore.search() uses client.search(); FakeVectorStore.search() returns stored entries
-- FakeVectorStore and FakeEmbeddingProvider used in all tests — no Docker, no model download
-- No LLM answer generation yet
-- No frontend yet
+- POST /api/chat: retrieve chunks → build context → call LLM → return grounded answer with citations
+- LLM provider architecture: OllamaLLMProvider (default) + FakeLLMProvider (tests)
+- llm_service.py: LLMProvider ABC, OllamaLLMProvider, FakeLLMProvider, generate_answer()
+- rag_service.py: orchestrates embed → search → format → generate → extract citations
+- ChatRequest / CitationSource / ChatResponse Pydantic schemas
+- conftest.py patched with FakeLLMProvider — no Ollama required for tests
+- No frontend yet; no user accounts; no chat history
 
 ## Testing Rule
 

@@ -19,6 +19,12 @@ class Settings(BaseSettings):
     vector_size: int = 384
     vector_distance: str = "Cosine"
 
+    # LLM (answer generation)
+    llm_provider: str = "ollama"
+    ollama_base_url: str = "http://localhost:11434"
+    ollama_model_name: str = "llama3.2:3b"
+    llm_timeout_seconds: int = 60
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

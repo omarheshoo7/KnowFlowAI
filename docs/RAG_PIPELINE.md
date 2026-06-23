@@ -49,9 +49,20 @@ Retrieval tuning (planned)
 - Tune top_k and minimum score thresholds.
 - Consider hybrid search (sparse BM25 + dense) for better recall on short queries.
 
-Answer generation (planned — Milestone 8)
-- Feed top-N retrieved chunks + user query into an LLM prompt.
-- LLM returns an answer with inline citations referencing source documents.
+Answer generation (implemented — Milestone 8)
+- Endpoint: `POST /api/chat` — accepts `{"question": "...", "top_k": N}`.
+- `rag_service.answer_question()` orchestrates the full pipeline.
+- Context is formatted as numbered excerpts: `[1] (from "file.pdf"): <chunk text>`.
+- Prompt instructs the LLM to cite sources as `[1]`, `[2]`, etc. and answer ONLY from the provided excerpts.
+- `OllamaLLMProvider.complete()` calls `POST /api/generate` on the local Ollama server with `stream: false`.
+- Citations are extracted from the answer text with `re.findall(r"\[\d+\]", answer)`.
+- Empty collection → fixed "I could not find relevant information in the uploaded documents." message; no LLM call.
+- Tests use `FakeLLMProvider` — deterministic, no network, no Ollama installation needed.
+- Service: `backend/app/services/llm_service.py`, `backend/app/services/rag_service.py`
+- Schemas: `backend/app/schemas/chat.py`
+- Route: `backend/app/api/routes/chat.py`
 
 Citation format
-- Inline bracketed citations with document_id and chunk_index, plus a sources array.
+- Inline bracketed citation numbers `[1]`, `[2]`, etc. in the answer text.
+- `citations` array lists all reference numbers found in the answer.
+- `sources` array lists each `CitationSource` with document_id, filename, file_type, chunk_index, score, and chunk_text_preview.

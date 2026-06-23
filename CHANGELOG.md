@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.9.0] - Milestone 8 — RAG Answer Generation with Citations
+- Added `llm_service.py` with `LLMProvider` ABC, `OllamaLLMProvider`, `FakeLLMProvider`, and `generate_answer()`.
+- Added `rag_service.py` — orchestrates embed → search → format context → generate → extract citations.
+- Added `POST /api/chat` endpoint in `backend/app/api/routes/chat.py`.
+- Added `ChatRequest`, `CitationSource`, `ChatResponse` schemas in `backend/app/schemas/chat.py`.
+- Extended `config.py` with `llm_provider`, `ollama_base_url`, `ollama_model_name`, `llm_timeout_seconds`.
+- Extended `conftest.py` with `fake_llm_provider` autouse fixture — no Ollama required for tests.
+- Added `httpx==0.27.0` to `requirements.txt` (used by `OllamaLLMProvider`).
+- `OllamaLLMProvider` calls `POST /api/generate` on a local Ollama instance with `stream: false`.
+- `FakeLLMProvider` returns a deterministic response containing `[1]` for citation extraction.
+- Empty retrieval returns the fixed message: "I could not find relevant information in the uploaded documents."
+- LLM prompt instructs the model to cite sources as `[1]`, `[2]`, etc.; answer grounded on retrieved chunks only.
+- Citations are extracted from the answer text via `re.findall(r"\[\d+\]", answer)`.
+- Added 22 new tests (schema, unit, integration); 115 total, all passing.
+- Updated CLAUDE.md, PROJECT_STATUS.md, CHANGELOG.md, README.md, docs/.
+
 ## [0.8.0] - Milestone 7 — Semantic Retrieval
 - Added `POST /api/search` endpoint: embeds query with `LocalBGEProvider`, runs top-K cosine search, returns scored chunks.
 - Added `backend/app/schemas/search.py` — `SearchRequest` (query, top_k 1–20), `SearchResult`, `SearchResponse`.

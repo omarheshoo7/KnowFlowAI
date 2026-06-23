@@ -117,6 +117,53 @@ Validation error — blank query (HTTP 422):
 }
 ```
 
+### POST /api/chat
+
+RAG answer generation. Retrieves top-K chunks, builds a grounded prompt, calls a local Ollama LLM, and returns a cited answer.
+
+Request body:
+```json
+{
+  "question": "What is the refund policy?",
+  "top_k": 5
+}
+```
+
+- `question` — required, must not be blank
+- `top_k` — optional integer 1–20, default 5
+
+Success response with documents (HTTP 200):
+```json
+{
+  "question": "What is the refund policy?",
+  "answer": "Refunds must be requested within 30 days of purchase [1].",
+  "citations": ["[1]"],
+  "sources": [
+    {
+      "source_id": "[1]",
+      "document_id": "a3f1c2d4...",
+      "original_filename": "policy.pdf",
+      "file_type": "pdf",
+      "chunk_index": 3,
+      "score": 0.87,
+      "chunk_text_preview": "Refund requests must be submitted within 30 days..."
+    }
+  ],
+  "retrieval_count": 1
+}
+```
+
+Empty collection response (HTTP 200):
+```json
+{
+  "question": "What is the refund policy?",
+  "answer": "I could not find relevant information in the uploaded documents.",
+  "citations": [],
+  "sources": [],
+  "retrieval_count": 0
+}
+```
+
 ---
 
 ## Planned endpoints
@@ -127,9 +174,6 @@ Auth
 Ingestion
 - `GET /documents/{id}` — Get document metadata and extraction status.
 - `GET /documents` — List documents with pagination and filters.
-
-Search & QA
-- `POST /qa` — Query body: `{"query": "...", "top_k": 5}`. Returns LLM answer with inline citations and source list.
 
 Admin
 - `GET /metrics` — Operational metrics (prometheus)
