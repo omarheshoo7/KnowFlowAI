@@ -5,8 +5,8 @@
 ---
 
 **Status:** In active development
-**Completed through:** Milestone 8 — RAG Answer Generation with Citations
-**Next:** Milestone 9 — SaaS Frontend Dashboard
+**Completed through:** Milestone 9 — SaaS Frontend Dashboard
+**Next:** Milestone 10 — Deployment & Portfolio Polish
 
 ---
 
@@ -30,6 +30,7 @@
 - Provider-based LLM architecture — `OllamaLLMProvider` (default) + `FakeLLMProvider` (tests)
 - Empty collection returns a clear "no information found" message; no hallucination
 - Full pytest coverage for all completed milestones (115 tests passing)
+- SaaS frontend dashboard — Next.js 14 + TypeScript + Tailwind CSS; Upload, Chat, Search panels with loading states, error banners, and empty states; backend health indicator
 
 ---
 
@@ -46,7 +47,7 @@
 | Embeddings | sentence-transformers / BAAI/bge-small-en-v1.5 |
 | Vector database | Qdrant (self-hosted via Docker) |
 | LLM (answer generation) | Ollama (local, free) — default model `llama3.2:3b` |
-| Frontend (upcoming) | TBD |
+| Frontend | Next.js 14, TypeScript, Tailwind CSS |
 
 ---
 
@@ -63,8 +64,31 @@
 | 6 | Vector Database / Qdrant | Complete |
 | 7 | Semantic Retrieval | Complete |
 | 8 | RAG Answer Generation with Citations | Complete |
-| 9 | SaaS Frontend Dashboard | **Next** |
+| 9 | SaaS Frontend Dashboard | Complete |
 | 10 | Deployment & Portfolio Polish | Planned |
+
+---
+
+## Frontend setup
+
+```bash
+# 1. Install dependencies
+cd frontend
+npm install
+
+# 2. Copy environment variables
+cp .env.local.example .env.local
+# Edit .env.local if your backend runs on a different port
+
+# 3. Start the development server
+npm run dev
+# → http://localhost:3000
+
+# 4. (Optional) Production build
+npm run build
+```
+
+The frontend expects the FastAPI backend at `http://localhost:8000` (configurable via `NEXT_PUBLIC_API_BASE_URL`).
 
 ---
 
@@ -335,6 +359,22 @@ KnowFlowAI/
 │       ├── test_vector_store.py
 │       ├── test_search.py
 │       └── test_chat.py
+├── frontend/
+│   ├── app/
+│   │   ├── layout.tsx                   # Root layout — Inter font, global styles
+│   │   ├── page.tsx                     # Dashboard — tab navigation
+│   │   └── globals.css                  # Tailwind base styles
+│   ├── components/
+│   │   ├── ApiStatus.tsx                # Backend health indicator
+│   │   ├── UploadPanel.tsx              # Document upload panel
+│   │   ├── ChatPanel.tsx                # AI Q&A panel
+│   │   └── SearchPanel.tsx              # Semantic search panel
+│   ├── lib/
+│   │   └── api.ts                       # Typed fetch wrappers for all endpoints
+│   ├── types/
+│   │   └── index.ts                     # TypeScript interfaces for API responses
+│   ├── .env.local.example               # Copy to .env.local before running
+│   └── package.json
 ├── docs/                                # Architecture and planning docs
 ├── CLAUDE.md                            # AI assistant project instructions
 ├── README.md
@@ -364,11 +404,11 @@ OCR and document-intelligence support may be added in a future version.
 | Provider / fake pattern | Swappable implementations (LocalBGE / Fake, Qdrant / Fake, Ollama / Fake) for fast offline tests |
 | Test-driven development | 115 passing tests across unit and integration layers, zero real services needed |
 | Modular AI engineering | Each concern (storage, extraction, chunking, embeddings, retrieval, LLM) lives in its own service |
+| Frontend engineering | Next.js 14 App Router, TypeScript, Tailwind CSS — tabbed dashboard connecting all backend endpoints |
 | SaaS product thinking | Structured milestone plan from backend to frontend to deployment |
 
 ---
 
 ## Roadmap
 
-- **Milestone 9** — SaaS frontend dashboard for document upload, search, and Q&A
 - **Milestone 10** — Deployment, monitoring, and portfolio polish

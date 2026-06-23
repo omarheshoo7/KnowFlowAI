@@ -1,7 +1,7 @@
 # Project Status — KnowFlow AI
 
-**Current milestone:** 8 — RAG Answer Generation with Citations — **Complete**
-**Next milestone:** 9 — SaaS Frontend Dashboard
+**Current milestone:** 9 — SaaS Frontend Dashboard — **Complete**
+**Next milestone:** 10 — Deployment & Portfolio Polish
 
 ---
 
@@ -18,12 +18,37 @@
 | 6 | Vector Database / Qdrant | Complete |
 | 7 | Semantic Retrieval | Complete |
 | 8 | RAG Answer Generation with Citations | **Complete** |
-| 9 | SaaS Frontend Dashboard | Next |
+| 9 | SaaS Frontend Dashboard | **Complete** |
 | 10 | Deployment & Portfolio Polish | Planned |
 
 ---
 
-## Milestone 8 — RAG Answer Generation with Citations (latest)
+## Milestone 9 — SaaS Frontend Dashboard (latest)
+
+**Deliverables**
+- `frontend/` — Next.js 14 App Router project with TypeScript and Tailwind CSS
+- `frontend/app/layout.tsx` — root layout with Inter font and global styles
+- `frontend/app/page.tsx` — dashboard page with Upload / Chat / Search tab navigation
+- `frontend/components/ApiStatus.tsx` — backend health indicator (online/offline + version)
+- `frontend/components/UploadPanel.tsx` — drag-and-drop document upload; displays all upload response fields
+- `frontend/components/ChatPanel.tsx` — question input, AI answer with inline citation badges and sources list
+- `frontend/components/SearchPanel.tsx` — semantic search with similarity score bar per result
+- `frontend/lib/api.ts` — typed fetch wrappers for all four backend endpoints
+- `frontend/types/index.ts` — TypeScript interfaces matching all API response shapes
+- `frontend/.env.local.example` — documents `NEXT_PUBLIC_API_BASE_URL=http://localhost:8000`
+
+**Behaviour**
+- Tab navigation: Upload → Chat → Search; ApiStatus in sticky header
+- UploadPanel: accepts .pdf .docx .txt .md; shows chunk_count, embedding_count, stored_vector_count, text_preview
+- ChatPanel: calls POST /api/chat; renders answer, citation badges ([1] [2]), and per-source text preview
+- SearchPanel: calls POST /api/search; renders similarity bar per result, word/char counts
+- All panels show loading spinners and error banners; empty-state messages before first request
+- `npm run build` completes clean — zero TypeScript and ESLint errors
+- Backend 115 tests: still passing, unaffected
+
+---
+
+## Milestone 8 — RAG Answer Generation with Citations
 
 **Deliverables**
 - `backend/app/services/llm_service.py` — `LLMProvider` ABC, `OllamaLLMProvider`, `FakeLLMProvider`, `generate_answer()`, `_build_prompt()`

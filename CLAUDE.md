@@ -34,17 +34,20 @@ Version 1 does not use OCR. It supports searchable PDFs, DOCX, TXT, and Markdown
 - Milestone 5 complete: provider-based embeddings (BAAI/bge-small-en-v1.5, 384-dim); FakeEmbeddingProvider for tests.
 - Milestone 6 complete: Qdrant vector database foundation; QdrantVectorStore + FakeVectorStore; stored_vector_count in upload response.
 - Milestone 7 complete: semantic retrieval; POST /api/search; ScoredChunk; VectorStore.search(); 93 tests passing.
-- Next milestone is Milestone 8: RAG Answer Generation with Citations.
+- Milestone 8 complete: RAG answer generation with citations; POST /api/chat; LLMProvider ABC; OllamaLLMProvider; FakeLLMProvider; rag_service; 115 tests passing.
+- Milestone 9 complete: SaaS frontend dashboard; Next.js 14 + TypeScript + Tailwind CSS; Upload, Chat, Search panels; ApiStatus; clean build.
+- Next milestone is Milestone 10: Deployment & Portfolio Polish.
 
-## Milestone 8 Scope
+## Milestone 9 Scope (complete)
 
-- POST /api/chat: retrieve chunks → build context → call LLM → return grounded answer with citations
-- LLM provider architecture: OllamaLLMProvider (default) + FakeLLMProvider (tests)
-- llm_service.py: LLMProvider ABC, OllamaLLMProvider, FakeLLMProvider, generate_answer()
-- rag_service.py: orchestrates embed → search → format → generate → extract citations
-- ChatRequest / CitationSource / ChatResponse Pydantic schemas
-- conftest.py patched with FakeLLMProvider — no Ollama required for tests
-- No frontend yet; no user accounts; no chat history
+- Next.js 14 App Router, TypeScript, Tailwind CSS — no paid APIs, no OCR
+- frontend/ directory: app/, components/, lib/, types/
+- UploadPanel: drag-and-drop upload, full response display (chunk_count, embedding_count, stored_vector_count, text_preview)
+- ChatPanel: question input, top-k selector, AI answer with inline citations and sources list
+- SearchPanel: semantic search, scored results with similarity progress bar
+- ApiStatus: backend health indicator in header (online/offline + version)
+- NEXT_PUBLIC_API_BASE_URL environment variable; .env.local.example provided
+- npm run build passes clean (zero TypeScript and ESLint errors)
 
 ## Testing Rule
 

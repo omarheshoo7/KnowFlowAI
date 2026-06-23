@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0] - Milestone 9 — SaaS Frontend Dashboard
+- Added `frontend/` — Next.js 14 App Router project with TypeScript and Tailwind CSS.
+- Added `frontend/app/layout.tsx` — root layout with Inter font and global Tailwind styles.
+- Added `frontend/app/page.tsx` — dashboard page with sticky header and Upload / Chat / Search tab navigation.
+- Added `frontend/components/ApiStatus.tsx` — polls `GET /api/health` on mount; shows online/offline dot and backend version.
+- Added `frontend/components/UploadPanel.tsx` — drag-and-drop file zone; validates extension client-side; displays chunk_count, embedding_count, stored_vector_count, text_preview, extraction_status.
+- Added `frontend/components/ChatPanel.tsx` — textarea + top-k input; calls `POST /api/chat`; renders grounded answer, citation badges, and per-source text previews with score.
+- Added `frontend/components/SearchPanel.tsx` — search bar + top-k input; calls `POST /api/search`; renders result cards with similarity progress bar, word count, char count.
+- Added `frontend/lib/api.ts` — typed `fetch` wrappers for health, upload, search, and chat endpoints.
+- Added `frontend/types/index.ts` — TypeScript interfaces for `HealthResponse`, `UploadResponse`, `SearchResponse`, `ChatResponse`, `CitationSource`, `SearchResult`.
+- Added `frontend/package.json`, `tsconfig.json`, `next.config.js`, `tailwind.config.ts`, `postcss.config.js`, `.eslintrc.json`.
+- Added `frontend/.env.local.example` — documents `NEXT_PUBLIC_API_BASE_URL=http://localhost:8000`.
+- `npm run build` passes clean — zero TypeScript and ESLint errors.
+- Backend 115 tests unaffected (still all passing).
+
 ## [0.9.0] - Milestone 8 — RAG Answer Generation with Citations
 - Added `llm_service.py` with `LLMProvider` ABC, `OllamaLLMProvider`, `FakeLLMProvider`, and `generate_answer()`.
 - Added `rag_service.py` — orchestrates embed → search → format context → generate → extract citations.
