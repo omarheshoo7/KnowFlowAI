@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.8.0] - Milestone 7 — Semantic Retrieval
+- Added `POST /api/search` endpoint: embeds query with `LocalBGEProvider`, runs top-K cosine search, returns scored chunks.
+- Added `backend/app/schemas/search.py` — `SearchRequest` (query, top_k 1–20), `SearchResult`, `SearchResponse`.
+- Added `backend/app/api/routes/search.py` and registered at `/api/search` in `main.py`.
+- Extended `VectorStore` ABC with `search(query_embedding, top_k) → List[ScoredChunk]`.
+- Added `ScoredChunk` dataclass to `vector_store_service.py`.
+- `QdrantVectorStore.search()` calls `client.search()` and maps `ScoredPoint` payloads to `ScoredChunk`.
+- `FakeVectorStore.search()` returns stored entries in insertion order with score 0.99 — no Docker needed.
+- `FakeVectorStore.store()` now also populates `_entries` list for per-point metadata lookups.
+- Added `search_chunks()` public function to `vector_store_service.py`.
+- Added 20 new tests (schema, unit, integration); 93 total, all passing.
+- Updated CLAUDE.md, PROJECT_STATUS.md, CHANGELOG.md, README.md, docs/.
+
 ## [0.7.0] - Milestone 6 — Vector Database / Qdrant
 - Added `vector_store_service` with `VectorStore` ABC, `QdrantVectorStore`, and `FakeVectorStore`.
 - `QdrantVectorStore` auto-creates the Qdrant collection and upserts one point per chunk with full payload.

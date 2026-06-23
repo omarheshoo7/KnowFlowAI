@@ -49,9 +49,36 @@ The REST API is available at `http://localhost:6333`. The dashboard is at `http:
 
 Tests do **not** require Docker — they use `FakeVectorStore` (in-memory).
 
-## Query plan (Milestone 7)
+## Search (implemented — Milestone 7)
 
-- Embed query text with the same `LocalBGEProvider`
-- Run top-K cosine search against the Qdrant collection
-- Return matching chunks with payload (chunk_text + document metadata)
-- Support metadata pre-filtering (e.g., by original_filename or file_type)
+`VectorStore.search(query_embedding, top_k) → List[ScoredChunk]`
+
+### QdrantVectorStore.search()
+```python
+hits = client.search(
+    collection_name=self._collection_name,
+    query_vector=query_embedding,
+    limit=top_k,
+)
+# Each hit has .score (float) and .payload (dict with all stored fields)
+```
+
+### FakeVectorStore.search()
+- Returns stored entries in insertion order with `score=0.99`
+- No Docker or network connection required
+
+### ScoredChunk fields returned
+| Field | Type | Description |
+|---|---|---|
+| `document_id` | string | UUID hex from the upload |
+| `original_filename` | string | User-supplied filename |
+| `stored_filename` | string | UUID-based on-disk filename |
+| `file_type` | string | pdf / docx / txt / md |
+| `chunk_index` | int | Position of chunk in the document |
+| `chunk_text` | string | Full chunk text |
+| `score` | float | Cosine similarity score (0–1) |
+| `word_count` | int | Words in this chunk |
+| `character_count` | int | Characters in this chunk |
+
+### Endpoint
+`POST /api/search` — see `docs/API_REFERENCE.md` for full request/response spec.

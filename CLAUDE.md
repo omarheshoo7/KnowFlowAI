@@ -32,15 +32,17 @@ Version 1 does not use OCR. It supports searchable PDFs, DOCX, TXT, and Markdown
 - Milestone 3 complete: text extraction (PyMuPDF, python-docx, plain text; scanned PDF detection).
 - Milestone 4 complete: word-based overlapping text chunking; upload response includes chunk_count.
 - Milestone 5 complete: provider-based embeddings (BAAI/bge-small-en-v1.5, 384-dim); FakeEmbeddingProvider for tests.
-- Next milestone is Milestone 6: Qdrant Vector Database Foundation.
+- Milestone 6 complete: Qdrant vector database foundation; QdrantVectorStore + FakeVectorStore; stored_vector_count in upload response.
+- Next milestone is Milestone 7: Semantic Retrieval.
 
-## Milestone 6 Scope
+## Milestone 7 Scope
 
-- QdrantVectorStore + FakeVectorStore provider architecture (mirrors embedding_service pattern)
-- Store one Qdrant point per chunk with full payload (text, metadata)
-- conftest.py patched with FakeVectorStore — no Docker required for tests
-- Upload response gains stored_vector_count field
-- No retrieval yet
+- POST /api/search endpoint: embed query → Qdrant top-K → return scored chunks
+- SearchRequest / SearchResult / SearchResponse Pydantic schemas
+- VectorStore ABC gains search(query_embedding, top_k) → List[ScoredChunk]
+- QdrantVectorStore.search() uses client.search(); FakeVectorStore.search() returns stored entries
+- FakeVectorStore and FakeEmbeddingProvider used in all tests — no Docker, no model download
+- No LLM answer generation yet
 - No frontend yet
 
 ## Testing Rule

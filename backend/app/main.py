@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from backend.app.core.config import settings
 from backend.app.core.logging import setup_logging
-from backend.app.api.routes import health, documents
+from backend.app.api.routes import health, documents, search
 
 setup_logging()
 
@@ -22,3 +22,4 @@ app.add_middleware(
 
 app.include_router(health.router, prefix="/api")
 app.include_router(documents.router, prefix="/api/documents")
+app.include_router(search.router, prefix="/api")

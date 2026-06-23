@@ -66,6 +66,57 @@ Error response — unsupported file type (HTTP 400):
 }
 ```
 
+### POST /api/search
+
+Semantic search over stored document chunks. Embeds the query using the same model used at ingestion, runs top-K cosine search against Qdrant, and returns scored chunks. No LLM answer generation.
+
+Request body:
+```json
+{
+  "query": "What is the refund policy?",
+  "top_k": 5
+}
+```
+
+- `query` — required string, must not be blank
+- `top_k` — optional integer 1–20, default 5
+
+Success response (HTTP 200):
+```json
+{
+  "query": "What is the refund policy?",
+  "top_k": 5,
+  "results": [
+    {
+      "document_id": "a3f1c2d4e5f6...",
+      "original_filename": "policy.pdf",
+      "file_type": "pdf",
+      "chunk_index": 3,
+      "chunk_text": "Refund requests must be submitted within 30 days of purchase...",
+      "score": 0.87,
+      "word_count": 120,
+      "character_count": 700
+    }
+  ]
+}
+```
+
+Empty collection response (HTTP 200):
+```json
+{
+  "query": "What is the refund policy?",
+  "top_k": 5,
+  "results": []
+}
+```
+
+Validation error — blank query (HTTP 422):
+```json
+{
+  "detail": [{"type": "value_error", "loc": ["body", "query"], "msg": "Value error, query must not be blank"}]
+}
+```
+
 ---
 
 ## Planned endpoints
@@ -77,12 +128,8 @@ Ingestion
 - `GET /documents/{id}` — Get document metadata and extraction status.
 - `GET /documents` — List documents with pagination and filters.
 
-Processing
-- `POST /documents/{id}/process` — Trigger extraction/chunking/embedding for a document.
-
 Search & QA
-- `POST /qa` — Query body: {"query": "...", "filters": {...}, "top_k": 5}. Returns answer, sources, and confidence.
-- `POST /search` — Return top-K chunks for a query.
+- `POST /qa` — Query body: `{"query": "...", "top_k": 5}`. Returns LLM answer with inline citations and source list.
 
 Admin
 - `GET /metrics` — Operational metrics (prometheus)

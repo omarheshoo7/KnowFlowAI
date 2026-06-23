@@ -5,8 +5,8 @@
 ---
 
 **Status:** In active development
-**Completed through:** Milestone 6 — Vector Database / Qdrant
-**Next:** Milestone 7 — Semantic Retrieval
+**Completed through:** Milestone 7 — Semantic Retrieval
+**Next:** Milestone 8 — RAG Answer Generation with Citations
 
 ---
 
@@ -24,7 +24,9 @@
 - `FakeEmbeddingProvider` for tests — no model download, fast and deterministic
 - Qdrant vector store — auto-creates collection, upserts one point per chunk with full payload
 - `FakeVectorStore` for tests — in-memory, no Docker or network required
-- Full pytest coverage for all completed milestones (73 tests passing)
+- Semantic search endpoint — `POST /api/search` embeds the query and returns top-K scored chunks
+- Input validation: empty/blank queries rejected (HTTP 422), `top_k` clamped 1–20
+- Full pytest coverage for all completed milestones (93 tests passing)
 
 ---
 
@@ -55,8 +57,8 @@
 | 4 | Text Chunking | Complete |
 | 5 | Embeddings Foundation | Complete |
 | 6 | Vector Database / Qdrant | Complete |
-| 7 | Semantic Retrieval | **Next** |
-| 8 | RAG Answer Generation with Citations | Planned |
+| 7 | Semantic Retrieval | Complete |
+| 8 | RAG Answer Generation with Citations | **Next** |
 | 9 | SaaS Frontend Dashboard | Planned |
 | 10 | Deployment & Portfolio Polish | Planned |
 
@@ -78,7 +80,7 @@ Returns backend health status.
 
 ### `POST /api/documents/upload`
 
-Upload a document file (`multipart/form-data`). Validates the file type, saves it locally, extracts text, chunks it, and generates embeddings in a single call.
+Upload a document file (`multipart/form-data`). Validates the file type, saves it locally, extracts text, chunks it, embeds it, and stores vectors in a single call.
 
 **Supported:** `.pdf` (text-native), `.docx`, `.txt`, `.md`
 
@@ -94,12 +96,13 @@ curl -X POST http://localhost:8000/api/documents/upload \
   "filename": "quarterly_report.pdf",
   "file_type": "pdf",
   "status": "uploaded",
-  "message": "Document uploaded, text extracted, chunked, and embedded successfully",
+  "message": "Document uploaded, text extracted, chunked, embedded, and stored successfully",
   "extraction_status": "success",
   "text_length": 18432,
   "text_preview": "Q3 Financial Summary\n\nRevenue grew 14% year-over-year...",
   "chunk_count": 37,
-  "embedding_count": 37
+  "embedding_count": 37,
+  "stored_vector_count": 37
 }
 ```
 
@@ -109,12 +112,13 @@ curl -X POST http://localhost:8000/api/documents/upload \
   "filename": "scan.pdf",
   "file_type": "pdf",
   "status": "uploaded",
-  "message": "This document appears to be scanned or image-based. KnowFlow AI v1 supports searchable documents only. OCR/document intelligence support may be added in a future version.",
+  "message": "This document appears to be scanned or image-based. KnowFlow AI v1 supports searchable documents only.",
   "extraction_status": "failed",
   "text_length": 0,
   "text_preview": "",
   "chunk_count": 0,
-  "embedding_count": 0
+  "embedding_count": 0,
+  "stored_vector_count": 0
 }
 ```
 
@@ -122,6 +126,59 @@ curl -X POST http://localhost:8000/api/documents/upload \
 ```json
 {
   "detail": "Unsupported file type '.png'. Allowed: ['.docx', '.md', '.pdf', '.txt']"
+}
+```
+
+---
+
+### `POST /api/search`
+
+Semantic search over all stored document chunks. Embeds the query with the same model used at ingestion and returns the top-K most similar chunks with scores.
+
+**Request body:**
+```json
+{
+  "query": "What is the refund policy?",
+  "top_k": 5
+}
+```
+
+- `query` — required, must not be blank
+- `top_k` — optional, integer 1–20, default 5
+
+**Success response:**
+```json
+{
+  "query": "What is the refund policy?",
+  "top_k": 5,
+  "results": [
+    {
+      "document_id": "a3f1c2d4...",
+      "original_filename": "policy.pdf",
+      "file_type": "pdf",
+      "chunk_index": 3,
+      "chunk_text": "Refund requests must be submitted within 30 days...",
+      "score": 0.87,
+      "word_count": 120,
+      "character_count": 700
+    }
+  ]
+}
+```
+
+**Empty collection (no documents uploaded yet):**
+```json
+{
+  "query": "What is the refund policy?",
+  "top_k": 5,
+  "results": []
+}
+```
+
+**Validation error (blank query):**
+```json
+{
+  "detail": [{"type": "value_error", "loc": ["body", "query"], "msg": "Value error, query must not be blank"}]
 }
 ```
 
@@ -144,13 +201,31 @@ source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 pip install -r requirements-dev.txt
 
-# 4. Start the backend
+# 4. Start Qdrant (required for real uploads and search; not needed for tests)
+docker run -p 6333:6333 qdrant/qdrant
+# → REST API: http://localhost:6333
+# → Dashboard: http://localhost:6333/dashboard
+
+# 5. Start the backend
 uvicorn backend.app.main:app --reload
 # → http://localhost:8000
 # → http://localhost:8000/docs  (Swagger UI)
 
-# 5. Run the test suite
-pytest
+# 6. Run the test suite (no Docker required — uses FakeVectorStore)
+PYTHONPATH=. pytest
+```
+
+### Manual end-to-end flow
+
+```bash
+# Upload a document
+curl -X POST http://localhost:8000/api/documents/upload \
+  -F "file=@your_document.pdf"
+
+# Search for relevant chunks
+curl -X POST http://localhost:8000/api/search \
+  -H "Content-Type: application/json" \
+  -d '{"query": "What is the refund policy?", "top_k": 5}'
 ```
 
 ---
@@ -161,29 +236,37 @@ pytest
 KnowFlowAI/
 ├── backend/
 │   ├── app/
-│   │   ├── main.py                  # FastAPI app, CORS, router registration
+│   │   ├── main.py                      # FastAPI app, CORS, router registration
 │   │   ├── core/
-│   │   │   ├── config.py            # Pydantic settings from env vars
-│   │   │   └── logging.py           # Stdout logging setup
+│   │   │   ├── config.py                # Pydantic settings from env vars
+│   │   │   └── logging.py               # Stdout logging setup
 │   │   ├── api/
 │   │   │   └── routes/
-│   │   │       ├── health.py        # GET /api/health
-│   │   │       └── documents.py     # POST /api/documents/upload
+│   │   │       ├── health.py            # GET /api/health
+│   │   │       ├── documents.py         # POST /api/documents/upload
+│   │   │       └── search.py            # POST /api/search
 │   │   ├── services/
-│   │   │   ├── storage_service.py   # File validation and local save
+│   │   │   ├── storage_service.py       # File validation and local save
 │   │   │   ├── text_extraction_service.py  # PDF/DOCX/TXT/MD extraction
-│   │   │   └── chunking_service.py  # Overlapping word-based chunking
+│   │   │   ├── chunking_service.py      # Overlapping word-based chunking
+│   │   │   ├── embedding_service.py     # BGE embeddings (local / fake)
+│   │   │   └── vector_store_service.py  # Qdrant store + search (real / fake)
 │   │   └── schemas/
-│   │       └── document.py          # Pydantic response models
+│   │       ├── document.py              # Upload response model
+│   │       └── search.py                # Search request / result / response
 │   ├── storage/
-│   │   └── uploads/                 # Uploaded files (git-ignored)
+│   │   └── uploads/                     # Uploaded files (git-ignored)
 │   └── tests/
+│       ├── conftest.py                  # FakeEmbeddingProvider + FakeVectorStore fixtures
 │       ├── test_health.py
 │       ├── test_documents.py
 │       ├── test_text_extraction.py
-│       └── test_chunking.py
-├── docs/                            # Architecture and planning docs
-├── CLAUDE.md                        # AI assistant project instructions
+│       ├── test_chunking.py
+│       ├── test_embeddings.py
+│       ├── test_vector_store.py
+│       └── test_search.py
+├── docs/                                # Architecture and planning docs
+├── CLAUDE.md                            # AI assistant project instructions
 ├── README.md
 ├── PROJECT_STATUS.md
 ├── CHANGELOG.md
@@ -207,18 +290,16 @@ OCR and document-intelligence support may be added in a future version.
 |---|---|
 | Backend API design | Clean FastAPI structure with separated routes, services, and schemas |
 | Document processing | Multi-format text extraction pipeline (PDF, DOCX, TXT, MD) |
-| RAG pipeline foundations | Text chunking with overlap, ready for embedding and vector retrieval |
-| Test-driven development | 47 passing tests across unit and integration layers |
-| Modular AI engineering | Each concern (storage, extraction, chunking) lives in its own service module |
+| RAG pipeline foundations | Upload → extract → chunk → embed → store → semantic search, end to end |
+| Provider / fake pattern | Swappable implementations (LocalBGE / Fake, Qdrant / Fake) enable fast, offline tests |
+| Test-driven development | 93 passing tests across unit and integration layers, zero mocking of business logic |
+| Modular AI engineering | Each concern (storage, extraction, chunking, embeddings, retrieval) lives in its own service |
 | SaaS product thinking | Structured milestone plan from backend to frontend to deployment |
 
 ---
 
 ## Roadmap
 
-- **Milestone 5** — Generate vector embeddings for each chunk using local BGE embeddings (sentence-transformers)
-- **Milestone 6** — Store and query vectors with Qdrant vector database
-- **Milestone 7** — Semantic retrieval endpoint: query → top-K relevant chunks
-- **Milestone 8** — RAG answer generation with inline citations referencing source documents
+- **Milestone 8** — RAG answer generation: feed retrieved chunks into an LLM and return an answer with inline citations
 - **Milestone 9** — SaaS frontend dashboard for document upload, search, and Q&A
 - **Milestone 10** — Deployment, monitoring, and portfolio polish

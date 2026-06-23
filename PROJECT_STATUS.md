@@ -1,7 +1,7 @@
 # Project Status — KnowFlow AI
 
-**Current milestone:** 6 — Vector Database / Qdrant — **Complete**
-**Next milestone:** 7 — Semantic Retrieval
+**Current milestone:** 7 — Semantic Retrieval — **Complete**
+**Next milestone:** 8 — RAG Answer Generation with Citations
 
 ---
 
@@ -15,15 +15,34 @@
 | 3 | Text Extraction | Complete |
 | 4 | Text Chunking | Complete |
 | 5 | Embeddings Foundation | Complete |
-| 6 | Vector Database / Qdrant | **Complete** |
-| 7 | Semantic Retrieval | Next |
-| 8 | RAG Answer Generation with Citations | Planned |
+| 6 | Vector Database / Qdrant | Complete |
+| 7 | Semantic Retrieval | **Complete** |
+| 8 | RAG Answer Generation with Citations | Next |
 | 9 | SaaS Frontend Dashboard | Planned |
 | 10 | Deployment & Portfolio Polish | Planned |
 
 ---
 
-## Milestone 6 — Vector Database / Qdrant (latest)
+## Milestone 7 — Semantic Retrieval (latest)
+
+**Deliverables**
+- `backend/app/schemas/search.py` — `SearchRequest`, `SearchResult`, `SearchResponse`
+- `backend/app/api/routes/search.py` — `POST /api/search` route
+- `backend/app/main.py` — search router registered at `/api`
+- `backend/app/services/vector_store_service.py` — `ScoredChunk` dataclass, `search()` on `VectorStore` ABC, `QdrantVectorStore.search()`, `FakeVectorStore.search()`, `search_chunks()` public function
+- `backend/tests/test_search.py` — 20 new tests; 93 total passing
+
+**Behaviour**
+- `POST /api/search` accepts `{"query": "...", "top_k": 5}` (top_k 1–20, default 5)
+- Query text is embedded with the same `LocalBGEProvider` used at ingestion
+- Qdrant returns top_k scored points; payloads are mapped to `SearchResult` objects
+- Empty query or whitespace → HTTP 422 (Pydantic validation)
+- Empty collection → HTTP 200 with `results: []`
+- Tests: `FakeVectorStore.search()` returns stored entries with score 0.99 — no Docker or model download
+
+---
+
+## Milestone 6 — Vector Database / Qdrant
 
 **Deliverables**
 - `backend/app/services/vector_store_service.py` — `VectorStore` ABC, `QdrantVectorStore`, `FakeVectorStore`, `store_chunks()` public function
@@ -73,7 +92,6 @@
 - Default: chunk_size_words=500, chunk_overlap_words=100 (step=400 words, 20% overlap)
 - Each `Chunk` carries: chunk_index, text, word_count, character_count
 - Failed extraction → chunk_count=0
-- Success message: "Document uploaded, text extracted, and chunked successfully"
 
 ---
 
@@ -110,10 +128,3 @@
 
 **Deliverables**
 - Architecture doc, PRD, RAG pipeline plan, ingestion plan, testing strategy, deployment plan, vector DB comparison, citation strategy
-
----
-
-## Open decisions
-
-- Confirm embedding model for Milestone 5 (local BGE via sentence-transformers is the current plan)
-- Confirm vector DB for Milestone 6 (Qdrant is the current plan)
