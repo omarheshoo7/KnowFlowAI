@@ -31,15 +31,15 @@ Version 1 does not use OCR. It supports searchable PDFs, DOCX, TXT, and Markdown
 - Milestone 2 complete: document upload endpoint with file-type validation and local storage.
 - Milestone 3 complete: text extraction (PyMuPDF, python-docx, plain text; scanned PDF detection).
 - Milestone 4 complete: word-based overlapping text chunking; upload response includes chunk_count.
-- Next milestone is Milestone 5: Embeddings Foundation.
+- Milestone 5 complete: provider-based embeddings (BAAI/bge-small-en-v1.5, 384-dim); FakeEmbeddingProvider for tests.
+- Next milestone is Milestone 6: Qdrant Vector Database Foundation.
 
-## Milestone 5 Scope
+## Milestone 6 Scope
 
-- Provider-based embedding architecture (LocalBGEProvider + FakeEmbeddingProvider for tests)
-- Default model: BAAI/bge-small-en-v1.5 via sentence-transformers
-- Tests use FakeEmbeddingProvider — no model download, fast and deterministic
-- Upload response gains embedding_count field
-- No vector database yet
+- QdrantVectorStore + FakeVectorStore provider architecture (mirrors embedding_service pattern)
+- Store one Qdrant point per chunk with full payload (text, metadata)
+- conftest.py patched with FakeVectorStore — no Docker required for tests
+- Upload response gains stored_vector_count field
 - No retrieval yet
 - No frontend yet
 

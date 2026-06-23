@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.0] - Milestone 6 — Vector Database / Qdrant
+- Added `vector_store_service` with `VectorStore` ABC, `QdrantVectorStore`, and `FakeVectorStore`.
+- `QdrantVectorStore` auto-creates the Qdrant collection and upserts one point per chunk with full payload.
+- `FakeVectorStore` is an in-memory store used in tests — no Docker or network required.
+- Extended `config.py` with `qdrant_url`, `qdrant_collection_name`, `vector_size`, `vector_distance`.
+- Extended `DocumentUploadResponse` schema with `stored_vector_count`.
+- Upload route calls `store_chunks` after embedding; message updated to include "stored".
+- Extended `conftest.py` with `fake_vector_store_provider` autouse fixture.
+- Added `qdrant-client==1.9.1` to requirements.txt.
+- Added 13 new tests (unit + integration); 73 total, all passing.
+- Updated CLAUDE.md milestone state.
+
 ## [0.6.0] - Milestone 5 — Embeddings Foundation
 - Added `embedding_service` with provider-based architecture.
 - `LocalBGEProvider` wraps sentence-transformers / BAAI/bge-small-en-v1.5 (384-dim, lazy import).

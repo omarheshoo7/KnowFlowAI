@@ -33,12 +33,13 @@ Success response — searchable document (HTTP 200):
   "filename": "report.pdf",
   "file_type": "pdf",
   "status": "uploaded",
-  "message": "Document uploaded, text extracted, chunked, and embedded successfully",
+  "message": "Document uploaded, text extracted, chunked, embedded, and stored successfully",
   "extraction_status": "success",
   "text_length": 4821,
   "text_preview": "Introduction\n\nThis report covers...",
   "chunk_count": 10,
-  "embedding_count": 10
+  "embedding_count": 10,
+  "stored_vector_count": 10
 }
 ```
 
@@ -53,7 +54,8 @@ Success response — scanned/image PDF (HTTP 200, extraction failed):
   "text_length": 0,
   "text_preview": "",
   "chunk_count": 0,
-  "embedding_count": 0
+  "embedding_count": 0,
+  "stored_vector_count": 0
 }
 ```
 

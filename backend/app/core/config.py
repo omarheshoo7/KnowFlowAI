@@ -13,6 +13,12 @@ class Settings(BaseSettings):
     embedding_model_name: str = "BAAI/bge-small-en-v1.5"
     embedding_batch_size: int = 32
 
+    # Qdrant vector database
+    qdrant_url: str = "http://localhost:6333"
+    qdrant_collection_name: str = "knowflow_documents"
+    vector_size: int = 384
+    vector_distance: str = "Cosine"
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

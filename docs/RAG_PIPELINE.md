@@ -25,7 +25,15 @@ Embeddings (implemented — Milestone 5)
 - Config: `embedding_provider`, `embedding_model_name`, `embedding_batch_size` in `core/config.py`.
 - Vectors are internal — not exposed in API responses.
 
-Retrieval tuning
+Vector storage (implemented — Milestone 6)
+- Provider architecture: `VectorStore` ABC → `QdrantVectorStore` / `FakeVectorStore`.
+- `QdrantVectorStore` auto-creates collection `knowflow_documents`, upserts one point per chunk.
+- Each point stores the 384-dim embedding plus full payload (text, filename, chunk_index, etc.).
+- Tests use `FakeVectorStore` — no Docker or network connection required.
+- Service: `backend/app/services/vector_store_service.py`
+- Config: `qdrant_url`, `qdrant_collection_name`, `vector_size`, `vector_distance` in `core/config.py`.
+
+Retrieval tuning (planned — Milestone 7)
 - Start with cosine similarity; tune top_k and score thresholds.
 - Consider hybrid search (sparse BM25 + dense) for better recall.
 

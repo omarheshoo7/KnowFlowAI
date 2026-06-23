@@ -5,8 +5,8 @@
 ---
 
 **Status:** In active development
-**Completed through:** Milestone 5 — Embeddings Foundation
-**Next:** Milestone 6 — Vector Database / Qdrant
+**Completed through:** Milestone 6 — Vector Database / Qdrant
+**Next:** Milestone 7 — Semantic Retrieval
 
 ---
 
@@ -22,7 +22,9 @@
 - Word-based overlapping chunking — 500 words per chunk, 100-word overlap
 - Provider-based embedding architecture — `BAAI/bge-small-en-v1.5` (384-dim) via sentence-transformers
 - `FakeEmbeddingProvider` for tests — no model download, fast and deterministic
-- Full pytest coverage for all completed milestones (60 tests passing)
+- Qdrant vector store — auto-creates collection, upserts one point per chunk with full payload
+- `FakeVectorStore` for tests — in-memory, no Docker or network required
+- Full pytest coverage for all completed milestones (73 tests passing)
 
 ---
 
@@ -37,7 +39,7 @@
 | File uploads | python-multipart |
 | Testing | pytest + httpx |
 | Embeddings | sentence-transformers / BAAI/bge-small-en-v1.5 |
-| Vector database (upcoming) | Qdrant |
+| Vector database | Qdrant (self-hosted via Docker) |
 | Frontend (upcoming) | TBD |
 
 ---
@@ -52,8 +54,8 @@
 | 3 | Text Extraction | Complete |
 | 4 | Text Chunking | Complete |
 | 5 | Embeddings Foundation | Complete |
-| 6 | Vector Database / Qdrant | **Next** |
-| 7 | Semantic Retrieval | Planned |
+| 6 | Vector Database / Qdrant | Complete |
+| 7 | Semantic Retrieval | **Next** |
 | 8 | RAG Answer Generation with Citations | Planned |
 | 9 | SaaS Frontend Dashboard | Planned |
 | 10 | Deployment & Portfolio Polish | Planned |

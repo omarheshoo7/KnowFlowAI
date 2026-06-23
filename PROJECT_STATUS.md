@@ -1,7 +1,7 @@
 # Project Status — KnowFlow AI
 
-**Current milestone:** 5 — Embeddings Foundation — **Complete**
-**Next milestone:** 6 — Vector Database / Qdrant
+**Current milestone:** 6 — Vector Database / Qdrant — **Complete**
+**Next milestone:** 7 — Semantic Retrieval
 
 ---
 
@@ -14,17 +14,35 @@
 | 2 | Document Upload & File Validation | Complete |
 | 3 | Text Extraction | Complete |
 | 4 | Text Chunking | Complete |
-| 5 | Embeddings Foundation | **Complete** |
-| 6 | Vector Database / Qdrant | Next |
-| 6 | Vector Database / Qdrant | Planned |
-| 7 | Semantic Retrieval | Planned |
+| 5 | Embeddings Foundation | Complete |
+| 6 | Vector Database / Qdrant | **Complete** |
+| 7 | Semantic Retrieval | Next |
 | 8 | RAG Answer Generation with Citations | Planned |
 | 9 | SaaS Frontend Dashboard | Planned |
 | 10 | Deployment & Portfolio Polish | Planned |
 
 ---
 
-## Milestone 5 — Embeddings Foundation (latest)
+## Milestone 6 — Vector Database / Qdrant (latest)
+
+**Deliverables**
+- `backend/app/services/vector_store_service.py` — `VectorStore` ABC, `QdrantVectorStore`, `FakeVectorStore`, `store_chunks()` public function
+- `backend/app/core/config.py` — extended with `qdrant_url`, `qdrant_collection_name`, `vector_size`, `vector_distance`
+- `backend/app/schemas/document.py` — extended with `stored_vector_count` field
+- `backend/app/api/routes/documents.py` — calls `store_chunks` after embedding; returns `stored_vector_count`
+- `backend/tests/conftest.py` — added `fake_vector_store_provider` autouse fixture
+- `backend/tests/test_vector_store.py` — 13 new tests (unit + integration); 73 total passing
+- `qdrant-client==1.9.1` added to requirements.txt
+
+**Behaviour**
+- `QdrantVectorStore` creates the collection if it doesn't exist, then upserts one PointStruct per chunk
+- Each point: UUID id, 384-dim vector, payload with document_id/filename/file_type/chunk_index/chunk_text/word_count/character_count
+- Tests: `FakeVectorStore` — in-memory list, no Docker or network
+- Failed extraction → stored_vector_count=0
+
+---
+
+## Milestone 5 — Embeddings Foundation
 
 **Deliverables**
 - `backend/app/services/embedding_service.py` — provider-based architecture with `LocalBGEProvider`, `FakeEmbeddingProvider`, and `embed_chunks()` public function
