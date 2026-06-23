@@ -50,3 +50,4 @@ Thumbs.db
 # Uploaded documents — keep the folder, ignore contents
 backend/storage/uploads/*
 !backend/storage/uploads/.gitkeep
+.hf_cache/
