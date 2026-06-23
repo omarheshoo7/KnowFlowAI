@@ -27,8 +27,8 @@ export default function ChatPanel() {
   }
 
   function handleTopKChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const val = parseInt(e.target.value);
-    if (!isNaN(val)) setTopK(Math.min(20, Math.max(1, val)));
+    const raw = parseInt(e.target.value, 10);
+    setTopK(Number.isNaN(raw) ? topK : Math.min(20, Math.max(1, raw)));
   }
 
   return (
