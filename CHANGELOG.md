@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.0] - Milestone 5 — Embeddings Foundation
+- Added `embedding_service` with provider-based architecture.
+- `LocalBGEProvider` wraps sentence-transformers / BAAI/bge-small-en-v1.5 (384-dim, lazy import).
+- `FakeEmbeddingProvider` provides deterministic zero vectors for tests — no model download.
+- `conftest.py` auto-patches all tests to use `FakeEmbeddingProvider` via `autouse` fixture.
+- Extended `config.py` with `embedding_provider`, `embedding_model_name`, `embedding_batch_size`.
+- Extended `DocumentUploadResponse` schema with `embedding_count`.
+- Upload route now embeds chunks after chunking; `embedding_count` included in response.
+- Upload success message updated to include "embedded".
+- Added `sentence-transformers==3.0.1` to requirements.txt.
+- Added 13 new tests (unit + integration); 60 total, all passing.
+- Updated CLAUDE.md milestone state.
+
 ## [0.5.0] - Milestone 4 — Text Chunking
 - Added `chunking_service` with word-based overlapping chunk splitting.
 - Default: chunk_size_words=500, chunk_overlap_words=100 (step=400).

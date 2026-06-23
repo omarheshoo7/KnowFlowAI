@@ -1,7 +1,7 @@
 # Project Status — KnowFlow AI
 
-**Current milestone:** 4 — Text Chunking — **Complete**
-**Next milestone:** 5 — Embeddings Foundation
+**Current milestone:** 5 — Embeddings Foundation — **Complete**
+**Next milestone:** 6 — Vector Database / Qdrant
 
 ---
 
@@ -13,8 +13,9 @@
 | 1 | FastAPI Backend Foundation | Complete |
 | 2 | Document Upload & File Validation | Complete |
 | 3 | Text Extraction | Complete |
-| 4 | Text Chunking | **Complete** |
-| 5 | Embeddings Foundation | Next |
+| 4 | Text Chunking | Complete |
+| 5 | Embeddings Foundation | **Complete** |
+| 6 | Vector Database / Qdrant | Next |
 | 6 | Vector Database / Qdrant | Planned |
 | 7 | Semantic Retrieval | Planned |
 | 8 | RAG Answer Generation with Citations | Planned |
@@ -23,7 +24,26 @@
 
 ---
 
-## Milestone 4 — Text Chunking (latest)
+## Milestone 5 — Embeddings Foundation (latest)
+
+**Deliverables**
+- `backend/app/services/embedding_service.py` — provider-based architecture with `LocalBGEProvider`, `FakeEmbeddingProvider`, and `embed_chunks()` public function
+- `backend/app/core/config.py` — extended with `embedding_provider`, `embedding_model_name`, `embedding_batch_size`
+- `backend/app/schemas/document.py` — extended with `embedding_count` field
+- `backend/app/api/routes/documents.py` — calls embedding after chunking; returns `embedding_count`
+- `backend/tests/conftest.py` — session `autouse` fixture patches all tests to use `FakeEmbeddingProvider`
+- `backend/tests/test_embeddings.py` — 13 new tests (unit + integration); 60 total passing
+- `sentence-transformers==3.0.1` added to requirements.txt
+
+**Behaviour**
+- Default provider: `LocalBGEProvider` using `BAAI/bge-small-en-v1.5` (384-dim vectors)
+- Tests: `FakeEmbeddingProvider` — returns `[0.1] * 384` per chunk, zero model load, deterministic
+- Failed extraction → embedding_count=0
+- Vectors are internal — not included in API responses
+
+---
+
+## Milestone 4 — Text Chunking
 
 **Deliverables**
 - `backend/app/services/chunking_service.py` — word-based sliding-window chunking with configurable size and overlap

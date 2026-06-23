@@ -30,16 +30,17 @@ Version 1 does not use OCR. It supports searchable PDFs, DOCX, TXT, and Markdown
 - Milestone 1 complete: FastAPI backend foundation (health endpoint, CORS, config, logging, pytest).
 - Milestone 2 complete: document upload endpoint with file-type validation and local storage.
 - Milestone 3 complete: text extraction (PyMuPDF, python-docx, plain text; scanned PDF detection).
-- Next milestone is Milestone 4: Text Chunking.
+- Milestone 4 complete: word-based overlapping text chunking; upload response includes chunk_count.
+- Next milestone is Milestone 5: Embeddings Foundation.
 
-## Milestone 4 Scope
+## Milestone 5 Scope
 
-- Split extracted text into overlapping word-based chunks
-- Default chunk_size_words=500, chunk_overlap_words=100
-- Each chunk carries chunk_index, text, word_count, character_count
-- Upload response gains chunk_count field
-- No embeddings yet
+- Provider-based embedding architecture (LocalBGEProvider + FakeEmbeddingProvider for tests)
+- Default model: BAAI/bge-small-en-v1.5 via sentence-transformers
+- Tests use FakeEmbeddingProvider — no model download, fast and deterministic
+- Upload response gains embedding_count field
 - No vector database yet
+- No retrieval yet
 - No frontend yet
 
 ## Testing Rule

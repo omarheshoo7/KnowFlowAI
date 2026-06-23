@@ -17,6 +17,14 @@ Chunking (implemented — Milestone 4)
 - Each chunk carries: chunk_index, text, word_count, character_count.
 - Service: `backend/app/services/chunking_service.py`
 
+Embeddings (implemented — Milestone 5)
+- Provider architecture: `EmbeddingProvider` ABC → `LocalBGEProvider` / `FakeEmbeddingProvider`.
+- Default model: `BAAI/bge-small-en-v1.5` via sentence-transformers (384-dim vectors).
+- Lazy model load — only initialised on first real request; tests bypass via `FakeEmbeddingProvider`.
+- Service: `backend/app/services/embedding_service.py`
+- Config: `embedding_provider`, `embedding_model_name`, `embedding_batch_size` in `core/config.py`.
+- Vectors are internal — not exposed in API responses.
+
 Retrieval tuning
 - Start with cosine similarity; tune top_k and score thresholds.
 - Consider hybrid search (sparse BM25 + dense) for better recall.

@@ -1,6 +1,11 @@
 from fastapi import APIRouter, UploadFile, File
 from backend.app.schemas.document import DocumentUploadResponse
-from backend.app.services import storage_service, text_extraction_service, chunking_service
+from backend.app.services import (
+    storage_service,
+    text_extraction_service,
+    chunking_service,
+    embedding_service,
+)
 
 router = APIRouter()
 
@@ -12,9 +17,11 @@ async def upload_document(file: UploadFile = File(...)):
 
     if extraction.extraction_status == "success":
         chunks = chunking_service.chunk_text(extraction.text)
-        message = "Document uploaded, text extracted, and chunked successfully"
+        embeddings = embedding_service.embed_chunks([c.text for c in chunks])
+        message = "Document uploaded, text extracted, chunked, and embedded successfully"
     else:
         chunks = []
+        embeddings = []
         message = extraction.message
 
     return DocumentUploadResponse(
@@ -26,4 +33,5 @@ async def upload_document(file: UploadFile = File(...)):
         text_length=extraction.text_length,
         text_preview=extraction.text_preview,
         chunk_count=len(chunks),
+        embedding_count=len(embeddings),
     )

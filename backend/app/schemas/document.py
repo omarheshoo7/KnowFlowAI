@@ -10,3 +10,4 @@ class DocumentUploadResponse(BaseModel):
     text_length: int
     text_preview: str
     chunk_count: int
+    embedding_count: int

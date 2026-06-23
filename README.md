@@ -5,8 +5,8 @@
 ---
 
 **Status:** In active development
-**Completed through:** Milestone 4 — Text Chunking
-**Next:** Milestone 5 — Embeddings Foundation
+**Completed through:** Milestone 5 — Embeddings Foundation
+**Next:** Milestone 6 — Vector Database / Qdrant
 
 ---
 
@@ -20,7 +20,9 @@
 - Text extraction — PyMuPDF for PDF, python-docx for DOCX, plain read for TXT/MD
 - Scanned/image-only PDF detection with a clear user-facing message (no OCR in v1)
 - Word-based overlapping chunking — 500 words per chunk, 100-word overlap
-- Full pytest coverage for all completed milestones (47 tests passing)
+- Provider-based embedding architecture — `BAAI/bge-small-en-v1.5` (384-dim) via sentence-transformers
+- `FakeEmbeddingProvider` for tests — no model download, fast and deterministic
+- Full pytest coverage for all completed milestones (60 tests passing)
 
 ---
 
@@ -34,7 +36,7 @@
 | DOCX extraction | python-docx |
 | File uploads | python-multipart |
 | Testing | pytest + httpx |
-| Embeddings (upcoming) | sentence-transformers / BGE |
+| Embeddings | sentence-transformers / BAAI/bge-small-en-v1.5 |
 | Vector database (upcoming) | Qdrant |
 | Frontend (upcoming) | TBD |
 
@@ -49,8 +51,8 @@
 | 2 | Document Upload & File Validation | Complete |
 | 3 | Text Extraction | Complete |
 | 4 | Text Chunking | Complete |
-| 5 | Embeddings Foundation | **Next** |
-| 6 | Vector Database / Qdrant | Planned |
+| 5 | Embeddings Foundation | Complete |
+| 6 | Vector Database / Qdrant | **Next** |
 | 7 | Semantic Retrieval | Planned |
 | 8 | RAG Answer Generation with Citations | Planned |
 | 9 | SaaS Frontend Dashboard | Planned |
@@ -74,7 +76,7 @@ Returns backend health status.
 
 ### `POST /api/documents/upload`
 
-Upload a document file (`multipart/form-data`). Validates the file type, saves it locally, extracts text, and splits it into chunks in a single call.
+Upload a document file (`multipart/form-data`). Validates the file type, saves it locally, extracts text, chunks it, and generates embeddings in a single call.
 
 **Supported:** `.pdf` (text-native), `.docx`, `.txt`, `.md`
 
@@ -90,11 +92,12 @@ curl -X POST http://localhost:8000/api/documents/upload \
   "filename": "quarterly_report.pdf",
   "file_type": "pdf",
   "status": "uploaded",
-  "message": "Document uploaded, text extracted, and chunked successfully",
+  "message": "Document uploaded, text extracted, chunked, and embedded successfully",
   "extraction_status": "success",
   "text_length": 18432,
   "text_preview": "Q3 Financial Summary\n\nRevenue grew 14% year-over-year...",
-  "chunk_count": 37
+  "chunk_count": 37,
+  "embedding_count": 37
 }
 ```
 
@@ -108,7 +111,8 @@ curl -X POST http://localhost:8000/api/documents/upload \
   "extraction_status": "failed",
   "text_length": 0,
   "text_preview": "",
-  "chunk_count": 0
+  "chunk_count": 0,
+  "embedding_count": 0
 }
 ```
 
